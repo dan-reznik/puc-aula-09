@@ -1,0 +1,13 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+```{r global}
+library(tidyverse)
+`%nin%` <- function(a,b) Negate(a %in% b)
+df_crimes <- read_csv2("data/crimes.zip")
+```
+
+
+
