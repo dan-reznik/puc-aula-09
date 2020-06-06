@@ -14,6 +14,7 @@ library(leaflet)
 #library(shiny)
 library(sf)
 library(plotly)
+library(RColorBrewer)
 
 df_aisp <- read_csv2("data/AispPorRegiao.csv")
 df_cisp_aisp <- read_csv2("data/CorrespondenciaCispAisp.csv") %>%
@@ -52,7 +53,7 @@ df_crimes_capital <- df_crimes %>%
 grupo_crimes <- df_crimes_capital %>% pull(grupo) %>% unique() %>%fct_inorder()
 
 
-pal <- RColorBrewer::brewer.pal(5,"Set2")
+pal <- brewer.pal(5,"Set2")
 
 names(pal) <- grupo_crimes
 
