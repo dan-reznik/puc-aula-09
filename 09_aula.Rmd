@@ -1,13 +1,136 @@
 ---
-title: "R Notebook"
-output: html_document
+title: "PUC PDT - Dashboard - Aula 09"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+runtime: shiny
 ---
 
-```{r global}
+```{r global, include=FALSE}
 library(tidyverse)
+library(flexdashboard)
 `%nin%` <- function(a,b) Negate(a %in% b)
 df_crimes <- read_csv2("data/crimes.zip")
+
+## Parametros para sidebar
+year_min <- min(df_crimes$ano)
+
+year_max <- max(df_crimes$ano)
+
+regions <- distinct(df_crimes %>% select(Regiao))
+
+
+## Parametros para value box's
+numero_crimes <- df_crimes %>% 
+  nrow()
+
+numero_furtos <- df_crimes %>%
+  filter(grupo == "Furtos") %>% 
+  nrow()
+
+numero_roubos <- df_crimes %>% 
+  filter(grupo == "Roubos") %>% 
+  nrow()
+
 ```
 
+# Page 1
 
+## Sidebar Page 1 {.sidebar}
+
+Inputs
+
+```{r}
+selectInput("region_selected", label = "Região:",
+            choices = regions, selected = regions[1])
+
+sliderInput("year_interval", label = "Intervalo de anos:",
+            min = year_min, max = year_max, value = c(year_min, year_max), sep = "")
+```
+
+## Row 1
+
+### Numero de Crimes
+```{r}
+valueBox(numero_crimes, icon = "fa-pencil")
+```
+
+### Numero de Furtos
+```{r}
+valueBox(numero_furtos, icon = "fa-pencil")
+```
+
+### Numero de Roubos
+```{r}
+valueBox(numero_roubos, icon = "fa-pencil")
+```
+
+## Row 2
+
+### Top 6 Crimes
+
+```{r}
+renderPlot({
+  
+  df_crimes %>%
+  filter(Regiao == input$region_selected) %>%
+  filter(ano %in% input$year_interval) %>%
+  group_by(tipo) %>%
+  summarize(contagem = sum(contagem, na.rm = T)) %>%
+  arrange(desc(contagem)) %>%
+  head(6) %>%
+  ggplot(aes(x = tipo, y = n, fill = tipo)) +
+    geom_col()
+  
+})
+```
+
+## Row 3
+
+### Top 6 Furtos
+
+```{r}
+renderPlot({
+  
+  df_crimes %>%
+  filter(Regiao == input$region_selected) %>%
+  filter(ano %in% input$year_interval) %>%
+  filter(grupo == "Furtos") %>%
+  group_by(tipo) %>%
+  summarize(contagem = sum(contagem, na.rm = T)) %>%
+  arrange(desc(contagem)) %>%
+  head(6) %>%
+  ggplot(aes(x = tipo, y = n, fill = tipo)) +
+    geom_col() +
+    coord_flip()
+  
+})
+```   
+ 
+### Top 6 Roubos
+    
+```{r}
+renderPlot({
+  
+  df_crimes %>%
+  filter(Regiao == input$region_selected) %>%
+  filter(ano %in% input$year_interval) %>%
+  filter(grupo == "Roubos") %>%
+  group_by(tipo) %>%
+  summarize(contagem = sum(contagem, na.rm = T)) %>%
+  arrange(desc(contagem)) %>%
+  head(6) %>%
+  ggplot(aes(x = tipo, y = n, fill = tipo)) +
+    geom_col() +
+    coord_flip()
+  
+})
+```
+
+```{r}
+df_crimes %>%
+  group_by(tipo) %>%
+  summarize(contagem = sum(contagem, na.rm = T)) %>%
+  arrange(desc(contagem))
+```
 
